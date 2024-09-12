@@ -12,7 +12,6 @@ class Game:
 
         self.moves = moves
         self.rules = Rules(moves)
-        self.key = KeyGenerator.generate_key()
 
     def print_error(self):
         print("Error: The number of moves must be an odd number greater than or equal to 3.")
@@ -62,16 +61,25 @@ class Game:
                 print("Invalid input. Please enter a number corresponding to a move or '?' for help.")
                 continue
 
+            # Generate a new key for each round
+            key = KeyGenerator.generate_key()
             computer_choice = random.randint(0, len(self.moves) - 1)
             user_move = self.moves[user_choice]
             computer_move = self.moves[computer_choice]
 
-            # Displaying the user's and computer's moves
-            result = self.rules.determine_winner(user_move, computer_move)
+            # Calculate HMAC based on the computer's move and the generated key
+            hmac_value = HMACCalculator.calculate_hmac(key, computer_move)
+
+            # Display HMAC value for user verification
+            print(f"HMAC: {hmac_value.hex()}")
+
+            # User makes their choice
             print(f"Your move: {user_move}")
             print(f"Computer move: {computer_move}")
+
+            # Determine the result
+            result = self.rules.determine_winner(user_move, computer_move)
             print(f"You {result}!")
 
-            # Display HMAC key
-            hmac_value = HMACCalculator.calculate_hmac(self.key, computer_move)
-            print(f"HMAC key: {self.key.hex()}")
+            # Display the key for user to verify HMAC
+            print(f"HMAC key: {key.hex()}")
